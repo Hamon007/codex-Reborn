@@ -2012,7 +2012,26 @@ function showToast(msg) {
 // SERVICE WORKER REGISTRATION
 // ═══════════════════════════════════════════════════════
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(console.error);
+  let reloadingForNewWorker = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloadingForNewWorker) return;
+    reloadingForNewWorker = true;
+    window.location.reload();
+  });
+
+  navigator.serviceWorker.register('./sw.js')
+    .then((registration) => {
+      // Beim Start sofort nach neuer Version suchen
+      registration.update();
+
+      // Beim Zurueckwechseln in den Tab erneut auf Updates pruefen
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          registration.update();
+        }
+      });
+    })
+    .catch(console.error);
 }
 </script>
 </body>

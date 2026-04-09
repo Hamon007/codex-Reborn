@@ -3,7 +3,8 @@
 // Offline-Fähigkeit für PWA
 // ═══════════════════════════════════════════════════════
 
-const CACHE_NAME = 'reborn-v4.9';
+const CACHE_NAME = 'reborn-v5.0';
+const OFFLINE_FALLBACK_URL = './index.html';
 
 const CACHE_FILES = [
   './',
@@ -55,24 +56,40 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch: Cache-first Strategie
+async function putInCache(request, response) {
+  if (!response || response.status !== 200 || response.type !== 'basic') return;
+  const cache = await caches.open(CACHE_NAME);
+  await cache.put(request, response.clone());
+}
+
+async function networkFirst(request, fallbackToIndex = false) {
+  try {
+    const networkResponse = await fetch(request);
+    await putInCache(request, networkResponse);
+    return networkResponse;
+  } catch (error) {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    if (fallbackToIndex) {
+      const appShell = await caches.match(OFFLINE_FALLBACK_URL);
+      if (appShell) return appShell;
+    }
+    throw error;
+  }
+}
+
+// Fetch: Online-first, Fallback zu Cache
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request).then((response) => {
-        // Erfolgreiche Responses in Cache speichern
-        if (response && response.status === 200 && response.type === 'basic') {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
-          });
-        }
-        return response;
-      }).catch(() => {
-        // Offline-Fallback
-        return caches.match('./index.html');
-      });
-    })
-  );
+  if (event.request.method !== 'GET') return;
+
+  const requestUrl = new URL(event.request.url);
+  const isSameOrigin = requestUrl.origin === self.location.origin;
+  const isNavigationRequest = event.request.mode === 'navigate';
+
+  if (!isSameOrigin) {
+    event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
+    return;
+  }
+
+  event.respondWith(networkFirst(event.request, isNavigationRequest));
 });
