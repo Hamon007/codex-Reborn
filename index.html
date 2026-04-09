@@ -305,6 +305,17 @@
       opacity: 1;
       transform: scale(1);
     }
+    @media (max-aspect-ratio: 9/16), ((max-width: 900px) and (orientation: portrait)) {
+      .scene-bg-image-layer {
+        background-size: contain;
+        background-position: center top;
+        background-color: #04030b;
+        transform: none;
+      }
+      .scene-bg-image-layer.show {
+        transform: none;
+      }
+    }
     .scene-bg-image-layer::after {
       content: '';
       position: absolute;
