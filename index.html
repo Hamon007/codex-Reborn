@@ -78,6 +78,26 @@
       from { opacity: 0; transform: translateY(16px); }
       to   { opacity: 1; transform: translateY(0); }
     }
+    @keyframes sceneGlitchJitter {
+      0%, 100% { transform: scale(1) translate(0, 0); }
+      20% { transform: scale(1.01) translate(-2px, 1px); }
+      40% { transform: scale(1.005) translate(2px, -1px); }
+      60% { transform: scale(1.01) translate(-1px, -1px); }
+      80% { transform: scale(1.005) translate(1px, 1px); }
+    }
+    @keyframes sceneGlitchTint {
+      0%, 100% { filter: brightness(0.82) saturate(1.02) contrast(1.02) hue-rotate(0deg); }
+      33% { filter: brightness(0.86) saturate(1.08) contrast(1.06) hue-rotate(18deg); }
+      66% { filter: brightness(0.84) saturate(1.1) contrast(1.08) hue-rotate(-18deg); }
+    }
+    @keyframes sceneGlitchScan {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(100%); }
+    }
+    @keyframes sceneGlitchFlicker {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 0.45; }
+    }
 
     /* ═══════════════════════════════════════════════════════
        SCREENS
@@ -271,6 +291,23 @@
       transform: scale(1.03);
       filter: brightness(0.82) saturate(1.02) contrast(1.02);
       transition: opacity 0.55s ease, transform 0.9s ease;
+    }
+    .scene-bg-image-layer.glitch.show {
+      animation: sceneGlitchJitter 0.28s steps(2, end) infinite,
+                 sceneGlitchTint 1.15s steps(2, end) infinite;
+    }
+    .scene-bg-image-layer.glitch::before {
+      content: '';
+      position: absolute;
+      inset: -20% 0;
+      pointer-events: none;
+      background:
+        linear-gradient(to bottom, transparent 0%, rgba(168,85,247,0.18) 46%, transparent 60%),
+        repeating-linear-gradient(180deg, transparent 0 14px, rgba(167,139,250,0.06) 14px 16px);
+      mix-blend-mode: screen;
+      animation: sceneGlitchScan 1.6s linear infinite,
+                 sceneGlitchFlicker 0.22s steps(2, end) infinite;
+      z-index: 1;
     }
     .scene-bg-image-layer.show {
       opacity: 1;
@@ -889,6 +926,13 @@ const SCENE_NODE_IMAGES = {
   a2k1_gruppe: './public/images/village-three-kids-well.png',
 };
 
+const GLITCH_SCENE_NODES = new Set([
+  'p0_void',
+  'p0_mehr_info',
+  'p0_ueberredung',
+  'p0_erklaerung',
+]);
+
 // ─── ALIGNMENT CONFIG ────────────────────────────────────
 const ALIGNMENT_BARS = [
   { key: "licht",        label: "LICHT",        color: "#f1c40f", icon: "☀" },
@@ -1116,8 +1160,10 @@ function renderSceneBackgroundImage(nodeId, bgKey) {
 
   const key = bgKey || 'void';
   const src = SCENE_NODE_IMAGES[nodeId] || SCENE_BACKGROUND_IMAGES[key] || null;
+  const hasGlitch = GLITCH_SCENE_NODES.has(nodeId);
 
   layer.classList.remove('show');
+  layer.classList.toggle('glitch', hasGlitch);
   if (!src) {
     layer.style.backgroundImage = 'none';
     return;
