@@ -3,7 +3,7 @@
 // Offline-Fähigkeit für PWA
 // ═══════════════════════════════════════════════════════
 
-const CACHE_NAME = 'reborn-v5.1';
+const CACHE_NAME = 'reborn-v5.2';
 const OFFLINE_FALLBACK_URL = './index.html';
 
 const CACHE_FILES = [
