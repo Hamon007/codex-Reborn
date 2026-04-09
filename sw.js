@@ -3,7 +3,7 @@
 // Offline-Fähigkeit für PWA
 // ═══════════════════════════════════════════════════════
 
-const CACHE_NAME = 'reborn-v3.8';
+const CACHE_NAME = 'reborn-v4.0';
 
 const CACHE_FILES = [
   './',
@@ -17,6 +17,19 @@ const CACHE_FILES = [
   './src/data/akt4.js',
   './src/data/akt5.js',
   './src/data/akt6.js',
+  './public/images/cottage-interior.png',
+  './public/images/glitch-wolves.png',
+  './public/images/boy-raven-shadows.png',
+  './public/images/child-on-log-goblin.png',
+  './public/images/cosmic-entity-digital-upheaval.png',
+  './public/images/kaito-coding-darkness.png',
+  './public/images/kaito-glowing-serverroom.png',
+  './public/images/kaito-injured-father.png',
+  './public/images/null-skill.png',
+  './public/images/protagonist-kaito.png',
+  './public/images/village-three-kids-well.png',
+  './public/images/village-willowbrook.png',
+  './public/images/void-entity.png',
   // Vollständig
 ];
 
