@@ -429,13 +429,13 @@
 
     /* Story text */
     .story-panel {
-      background: rgba(0,0,0,0.32);
+      background: transparent;
       border: 1px solid rgba(168,85,247,0.2);
       border-radius: 10px;
       padding: 16px 16px 12px;
-      box-shadow: 0 16px 34px rgba(0,0,0,0.34);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 16px 34px rgba(0,0,0,0.24);
+      backdrop-filter: blur(11px) brightness(0.58) saturate(1.05);
+      -webkit-backdrop-filter: blur(11px) brightness(0.58) saturate(1.05);
       cursor: pointer;
     }
     .story-speaker {
@@ -454,7 +454,7 @@
       font-family: var(--font-serif);
       animation: fadeIn 0.4s ease;
       min-height: 120px;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.82), 0 0 12px rgba(0,0,0,0.38);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 14px rgba(0,0,0,0.46);
     }
     .story-text strong { color: #d8b4fe; font-weight: 700; }
     .story-text em { color: rgba(216,180,254,0.82); font-style: italic; }
