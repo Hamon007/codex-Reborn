@@ -410,29 +410,6 @@
       letter-spacing: 1px;
     }
 
-    /* Alignment Panel */
-    .alignment-panel {
-      background: rgba(6,6,10,0.55);
-      border: 1px solid rgba(148,163,184,0.15);
-      border-radius: 3px; padding: 10px 14px;
-      margin-bottom: 16px;
-    }
-    .alignment-label {
-      font-family: var(--font-mono); font-size: 9px;
-      letter-spacing: 2px; color: var(--text-dim);
-      margin-bottom: 8px;
-    }
-    .alignment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
-    .alignment-row { margin-bottom: 6px; }
-    .alignment-row-header {
-      display: flex; justify-content: space-between;
-      font-family: var(--font-mono); font-size: 10px;
-      color: var(--text-dim); margin-bottom: 2px;
-    }
-    .alignment-val { font-size: 10px; }
-    .alignment-bar-bg { background: #111; border-radius: 2px; height: 2px; }
-    .alignment-bar { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
-
     /* Main content */
     .game-content {
       position: relative; z-index: 1;
@@ -903,12 +880,6 @@
 
   <!-- Spielinhalt -->
   <div class="game-content" id="game-content">
-    <!-- Alignment Panel -->
-    <div class="alignment-panel">
-      <div class="alignment-label">ALIGNMENT MATRIX</div>
-      <div class="alignment-grid" id="alignment-grid"></div>
-    </div>
-
     <!-- Scene info -->
     <div class="scene-label" id="scene-label"></div>
     <div class="chapter-label" id="chapter-label"></div>
@@ -1396,9 +1367,6 @@ function renderNode(nodeId, instant = false) {
   document.getElementById('node-title').textContent = currentNode.title || '';
   renderStorySpeaker(currentNode);
 
-  // Alignment Panel
-  renderAlignment();
-
   // Navigation
   document.getElementById('btn-back').disabled = state.history.length === 0;
 
@@ -1780,33 +1748,6 @@ function handleChoice(choice) {
   content.style.opacity = '0';
   content.style.transition = 'opacity 0.3s ease';
   setTimeout(() => { content.style.opacity='1'; renderNode(choice.next); }, 950);
-}
-
-// ═══════════════════════════════════════════════════════
-// ALIGNMENT PANEL
-// ═══════════════════════════════════════════════════════
-function renderAlignment() {
-  const grid = document.getElementById('alignment-grid');
-  grid.innerHTML = '';
-
-  ALIGNMENT_BARS.forEach(bar => {
-    const val = state.alignment[bar.key] || 0;
-    const pct = Math.min(100, (val / 15) * 100);
-
-    const row = document.createElement('div');
-    row.className = 'alignment-row';
-
-    row.innerHTML = `
-      <div class="alignment-row-header">
-        <span>${bar.icon} ${bar.label}</span>
-        <span class="alignment-val" style="color:${bar.color}">${val}</span>
-      </div>
-      <div class="alignment-bar-bg">
-        <div class="alignment-bar" style="width:${pct}%;background:${bar.color}"></div>
-      </div>
-    `;
-    grid.appendChild(row);
-  });
 }
 
 // ═══════════════════════════════════════════════════════

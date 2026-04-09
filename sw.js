@@ -3,7 +3,7 @@
 // Offline-Fähigkeit für PWA
 // ═══════════════════════════════════════════════════════
 
-const CACHE_NAME = 'reborn-v4.5';
+const CACHE_NAME = 'reborn-v4.6';
 
 const CACHE_FILES = [
   './',
