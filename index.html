@@ -305,17 +305,6 @@
       opacity: 1;
       transform: scale(1);
     }
-    @media (max-aspect-ratio: 9/16), ((max-width: 900px) and (orientation: portrait)) {
-      .scene-bg-image-layer {
-        background-size: contain;
-        background-position: center top;
-        background-color: #04030b;
-        transform: none;
-      }
-      .scene-bg-image-layer.show {
-        transform: none;
-      }
-    }
     .scene-bg-image-layer::after {
       content: '';
       position: absolute;
@@ -566,7 +555,8 @@
     }
 
     /* ─── MENU SCREEN ─── */
-    #screen-menu {
+    #screen-menu,
+    #screen-status {
       background: rgba(6,6,10,0.97);
       position: fixed; inset: 0; z-index: 200;
       align-items: center; justify-content: center;
@@ -574,14 +564,25 @@
     .menu-box {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 4px; padding: 24px;
-      max-width: 860px; width: 96%;
+      border-radius: 4px; padding: 32px;
+      max-width: 340px; width: 90%;
+      text-align: center;
+    }
+    .status-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 24px;
+      max-width: 860px;
+      width: 96%;
       text-align: left;
+      max-height: 92vh;
+      overflow-y: auto;
     }
     .menu-title {
       font-family: var(--font-mono); font-size: 12px;
       letter-spacing: 3px; color: var(--text-dim);
-      margin-bottom: 16px;
+      margin-bottom: 24px;
       text-align: center;
     }
     .menu-btn {
@@ -595,12 +596,12 @@
     }
     .menu-btn:active { background: var(--surface-hover); color: var(--text); }
     .menu-btn.danger { color: var(--red); border-color: rgba(224,92,92,0.3) !important; }
-    .menu-stat-grid { margin-bottom: 16px; }
     .status-panel {
       border: 1px solid rgba(168,85,247,0.25);
       border-radius: 8px;
       background: rgba(6,6,10,0.68);
       padding: 16px;
+      margin-bottom: 16px;
     }
     .status-title {
       font-family: var(--font-mono);
@@ -688,7 +689,8 @@
       font-weight: 600;
     }
     @media (max-width: 640px) {
-      .menu-box {
+      .menu-box,
+      .status-box {
         width: 100%;
         max-width: 100%;
         height: 100vh;
@@ -874,6 +876,7 @@
       <span class="topbar-chapter" id="topbar-chapter"></span>
     </div>
     <div class="topbar-right">
+      <button class="btn-menu" onclick="openStatus()">◈ STATUS</button>
       <span class="topbar-scenes" id="topbar-scenes">0 SZENEN</span>
     </div>
   </div>
@@ -922,12 +925,17 @@
 <!-- ══════════════════════════════════════════════════════
      MENU SCREEN
 ══════════════════════════════════════════════════════ -->
+<div id="screen-status" class="screen">
+  <div class="status-box">
+    <div class="menu-title">◈ STATUS</div>
+    <div id="status-root"></div>
+    <button class="menu-btn" onclick="closeStatus()">▷ ZURÜCK ZUM SPIEL</button>
+  </div>
+</div>
+
 <div id="screen-menu" class="screen">
   <div class="menu-box">
     <div class="menu-title">◈ PAUSE</div>
-
-    <div class="menu-stat-grid" id="menu-stats"></div>
-
     <button class="menu-btn" onclick="closeMenu()">▷ WEITERSPIELEN</button>
     <button class="menu-btn" onclick="openSaveModal('save')">◈ SPEICHERN</button>
     <button class="menu-btn" onclick="openSaveModal('load')">↺ LADEN</button>
@@ -1114,6 +1122,8 @@ window.setLanguage = async function(lang) {
 };
 window.openMenu = openMenu;
 window.closeMenu = closeMenu;
+window.openStatus = openStatus;
+window.closeStatus = closeStatus;
 window.goBack = goBack;
 window.handleStoryClick = handleStoryClick;
 window.skipTypewriter = skipTypewriter;
@@ -1765,6 +1775,14 @@ function goBack() {
 // MENU
 // ═══════════════════════════════════════════════════════
 function openMenu() {
+  showScreen('menu');
+}
+
+function closeMenu() {
+  showScreen('game');
+}
+
+function buildStatusPanelHtml() {
   const getAxisTendency = (leftKey, rightKey, leftLabel, rightLabel) => {
     const leftVal = state.alignment[leftKey] || 0;
     const rightVal = state.alignment[rightKey] || 0;
@@ -1799,8 +1817,7 @@ function openMenu() {
   const visibility = getVisibility();
   const endingTendency = getEndingTendency();
 
-  const statsEl = document.getElementById('menu-stats');
-  statsEl.innerHTML = `
+  return `
     <div class="status-panel">
       <div class="status-title">STATUS PANEL</div>
 
@@ -1862,10 +1879,17 @@ function openMenu() {
       </div>
     </div>
   `;
-  showScreen('menu');
 }
 
-function closeMenu() {
+function openStatus() {
+  const root = document.getElementById('status-root');
+  if (root) {
+    root.innerHTML = buildStatusPanelHtml();
+  }
+  showScreen('status');
+}
+
+function closeStatus() {
   showScreen('game');
 }
 
