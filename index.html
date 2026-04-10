@@ -1476,12 +1476,7 @@ function startNewGame() {
 }
 
 function continueGame() {
-  const saved = loadFromStorage();
-  if (saved) {
-    state = saved;
-    showScreen('game');
-    renderNode(state.nodeId);
-  }
+  openSaveModal('load');
 }
 
 function applyAffinityMap(effectMap) {
@@ -2349,8 +2344,7 @@ window.openSaveModal = openSaveModal;
 
 function goToTitle() {
   showScreen('title');
-  const saved = loadFromStorage();
-  document.getElementById('btn-continue').style.display = saved ? 'block' : 'none';
+  document.getElementById('btn-continue').style.display = hasSave() ? 'block' : 'none';
 }
 
 function confirmNewGame() {
