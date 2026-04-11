@@ -3,7 +3,7 @@
 // Offline-Fähigkeit für PWA
 // ═══════════════════════════════════════════════════════
 
-const CACHE_NAME = 'reborn-v5.3';
+const CACHE_NAME = 'reborn-v5.4';
 const OFFLINE_FALLBACK_URL = './index.html';
 
 const CACHE_FILES = [
@@ -26,8 +26,13 @@ const CACHE_FILES = [
   './public/images/kaito-coding-darkness.png',
   './public/images/kaito-glowing-serverroom.png',
   './public/images/kaito-injured-father.png',
+  './public/images/kaito-exit-stairwell.png',
   './public/images/null-skill.png',
   './public/images/protagonist-kaito.png',
+  './public/images/chaos-village-apocalypse.png',
+  './public/images/city-grand-gate.png',
+  './public/images/dungeon-dark-inquisition.png',
+  './public/images/swamp-river-encounter.png',
   './public/images/village-three-kids-well.png',
   './public/images/village-willowbrook.png',
   './public/images/void-entity.png',
