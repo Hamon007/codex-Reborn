@@ -1252,6 +1252,58 @@ const GLITCH_SCENE_NODES = new Set([
   'p0_erklaerung',
 ]);
 const VOID_FRAGMENT_TOKENS = ['NULL', '0x00', 'ERR', '//', '{}', '<>', '::', '[]', 'SYS', 'VOID'];
+const sceneImagePromises = new Map();
+let sceneBackgroundSwapToken = 0;
+
+function resolveSceneImageSource(nodeId, bgKey) {
+  const fallbackBg = bgKey || STORY[nodeId]?.bg || 'void';
+  return SCENE_NODE_IMAGES[nodeId] || SCENE_BACKGROUND_IMAGES[fallbackBg] || null;
+}
+
+function preloadSceneImage(src) {
+  if (!src) return Promise.resolve(false);
+  if (sceneImagePromises.has(src)) return sceneImagePromises.get(src);
+
+  const promise = new Promise((resolve) => {
+    const img = new Image();
+    img.decoding = 'async';
+
+    const finish = () => resolve(true);
+    img.onload = () => {
+      if (typeof img.decode === 'function') {
+        img.decode().then(finish).catch(finish);
+        return;
+      }
+      finish();
+    };
+    img.onerror = () => resolve(false);
+    img.src = src;
+  });
+
+  sceneImagePromises.set(src, promise);
+  return promise;
+}
+
+function preloadNodeSceneImage(nodeId, bgKey) {
+  return preloadSceneImage(resolveSceneImageSource(nodeId, bgKey));
+}
+
+function preloadLikelyNextSceneImages(nodeId) {
+  const node = STORY[nodeId];
+  if (!node?.choices?.length) return;
+
+  const nextNodeIds = [
+    ...new Set(
+      node.choices
+        .map(choice => choice?.next)
+        .filter(nextId => nextId && !String(nextId).startsWith('__'))
+    ),
+  ].slice(0, 6);
+
+  nextNodeIds.forEach(nextId => {
+    preloadNodeSceneImage(nextId);
+  });
+}
 
 // ─── ALIGNMENT CONFIG ────────────────────────────────────
 const ALIGNMENT_BARS = [
@@ -1337,6 +1389,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (hasSave()) {
     document.getElementById('btn-continue').style.display = 'block';
   }
+
+  // Ersten Story-Screen bereits im Hintergrund laden fuer schnelleren Einstieg.
+  preloadNodeSceneImage(state.nodeId);
 
   showScreen('title');
 });
@@ -1604,21 +1659,35 @@ function renderSceneBackgroundImage(nodeId, bgKey) {
   if (!layer) return;
 
   const key = bgKey || 'void';
-  const src = SCENE_NODE_IMAGES[nodeId] || SCENE_BACKGROUND_IMAGES[key] || null;
+  const src = resolveSceneImageSource(nodeId, key);
   const hasGlitch = GLITCH_SCENE_NODES.has(nodeId);
+  const currentSrc = layer.dataset.src || '';
+  const token = ++sceneBackgroundSwapToken;
 
-  layer.classList.remove('show');
   layer.classList.toggle('glitch', hasGlitch);
   if (!src) {
+    layer.classList.remove('show');
     layer.style.backgroundImage = 'none';
+    layer.dataset.src = '';
     setVoidFragmentsVisible(false);
     return;
   }
 
-  layer.style.backgroundImage = `url("${src}")`;
-  setVoidFragmentsVisible(hasGlitch);
-  requestAnimationFrame(() => {
-    layer.classList.add('show');
+  if (currentSrc === src) {
+    setVoidFragmentsVisible(hasGlitch);
+    return;
+  }
+
+  preloadSceneImage(src).then(() => {
+    if (token !== sceneBackgroundSwapToken) return;
+    layer.classList.remove('show');
+    layer.style.backgroundImage = `url("${src}")`;
+    layer.dataset.src = src;
+    setVoidFragmentsVisible(hasGlitch);
+    requestAnimationFrame(() => {
+      if (token !== sceneBackgroundSwapToken) return;
+      layer.classList.add('show');
+    });
   });
 }
 
@@ -1647,6 +1716,10 @@ function renderNode(nodeId, instant = false) {
   currentNode = state.language === 'en' && currentTranslations
     ? applyLanguage({...rawNode, _id: nodeId}, 'en', currentTranslations)
     : rawNode;
+
+  // Aktuelle und wahrscheinliche naechste Szenenbilder frueh laden.
+  preloadNodeSceneImage(nodeId, currentNode.bg || 'void');
+  preloadLikelyNextSceneImages(nodeId);
 
   setStoryDisplayMode(getSceneDisplayMode(currentNode));
   document.getElementById('game-content').dataset.displayMode = currentDisplayMode;

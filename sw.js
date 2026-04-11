@@ -3,7 +3,7 @@
 // Offline-Fähigkeit für PWA
 // ═══════════════════════════════════════════════════════
 
-const CACHE_NAME = 'reborn-v5.4';
+const CACHE_NAME = 'reborn-v5.5';
 const OFFLINE_FALLBACK_URL = './index.html';
 
 const CACHE_FILES = [
@@ -83,6 +83,42 @@ async function networkFirst(request, fallbackToIndex = false) {
   }
 }
 
+function isImageRequest(request) {
+  if (request.destination === 'image') return true;
+  const path = new URL(request.url).pathname.toLowerCase();
+  return (
+    path.endsWith('.png') ||
+    path.endsWith('.jpg') ||
+    path.endsWith('.jpeg') ||
+    path.endsWith('.webp') ||
+    path.endsWith('.avif') ||
+    path.endsWith('.gif') ||
+    path.endsWith('.svg')
+  );
+}
+
+async function imageCacheFirst(request, event) {
+  const cached = await caches.match(request);
+  if (cached) {
+    event.waitUntil(
+      fetch(request)
+        .then(response => putInCache(request, response))
+        .catch(() => null)
+    );
+    return cached;
+  }
+
+  try {
+    const networkResponse = await fetch(request);
+    await putInCache(request, networkResponse);
+    return networkResponse;
+  } catch (error) {
+    const fallback = await caches.match(request);
+    if (fallback) return fallback;
+    throw error;
+  }
+}
+
 // Fetch: Online-first, Fallback zu Cache
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
@@ -93,6 +129,11 @@ self.addEventListener('fetch', (event) => {
 
   if (!isSameOrigin) {
     event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
+    return;
+  }
+
+  if (isImageRequest(event.request)) {
+    event.respondWith(imageCacheFirst(event.request, event));
     return;
   }
 
