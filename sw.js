@@ -1,9 +1,8 @@
-// ═══════════════════════════════════════════════════════
-// REBORN IN SHADOW — SERVICE WORKER
-// Offline-Fähigkeit für PWA
-// ═══════════════════════════════════════════════════════
+﻿// =======================================================
+// REBORN IN SHADOW - SERVICE WORKER
+// Offline support for PWA
+// =======================================================
 
-const CACHE_NAME = 'reborn-v5.9';
 const OFFLINE_FALLBACK_URL = './index.html';
 
 const CACHE_FILES = [
@@ -18,52 +17,84 @@ const CACHE_FILES = [
   './src/data/akt4.js',
   './src/data/akt5.js',
   './src/data/akt6.js',
-  './public/images/cottage-interior.png',
-  './public/images/glitch-wolves.png',
+  './src/data/en/prolog_en.js',
+  './src/data/en/akt1_en.js',
+  './src/data/en/akt2_en.js',
+  './src/data/en/akt3_en.js',
+  './src/data/en/akt4_en.js',
+  './src/data/en/akt5_en.js',
+  './src/data/en/akt6_en.js',
   './public/images/boy-raven-shadows.png',
+  './public/images/chaos-village-apocalypse.png',
   './public/images/child-on-log-goblin.png',
+  './public/images/city-grand-gate.png',
   './public/images/cosmic-entity-digital-upheaval.png',
-  './public/images/kaito-coding-darkness.png',
+  './public/images/cottage-interior.png',
+  './public/images/dungeon-dark-inquisition.png',
+  './public/images/elena-lullaby-night.png',
+  './public/images/family-daily-montage.png',
+  './public/images/family-first-night-watch.png',
+  './public/images/glitch-wolves.png',
+  './public/images/gregor-farewell-bedside.png',
+  './public/images/gregor-mentor-triptych.png',
+  './public/images/inquisition-shadow-arrest.png',
   './public/images/kaito-birth-family.png',
-  './public/images/kaito-first-word-kitchen.png',
-  './public/images/kaito-first-code-read.png',
+  './public/images/kaito-coding-darkness.png',
+  './public/images/kaito-exit-stairwell.png',
+  './public/images/kaito-family-after-conflict.png',
   './public/images/kaito-family-scan.png',
-  './public/images/mira-birth-intro.png',
-  './public/images/mira-scan-field.png',
+  './public/images/kaito-first-code-read.png',
+  './public/images/kaito-first-word-kitchen.png',
   './public/images/kaito-glowing-serverroom.png',
   './public/images/kaito-injured-father.png',
-  './public/images/kaito-exit-stairwell.png',
+  './public/images/kaito-night-archive-coding.png',
+  './public/images/kaito-post-battle-night.png',
+  './public/images/kaito-server-death-burst.png',
+  './public/images/mira-birth-intro.png',
+  './public/images/mira-scan-field.png',
   './public/images/null-skill.png',
   './public/images/protagonist-kaito.png',
-  './public/images/chaos-village-apocalypse.png',
-  './public/images/city-grand-gate.png',
-  './public/images/dungeon-dark-inquisition.png',
+  './public/images/roland-training-village.png',
+  './public/images/sera-fire-outburst.png',
   './public/images/swamp-river-encounter.png',
   './public/images/village-three-kids-well.png',
   './public/images/village-willowbrook.png',
   './public/images/void-entity.png',
-  // Vollständig
+  './icons/icon-192.png',
+  './icons/icon-512.png',
 ];
 
-// Installation: alle Dateien in den Cache laden
+const CACHE_NAME = `reborn-${hashCacheFiles(CACHE_FILES)}`;
+
+function hashCacheFiles(files) {
+  const input = files.join('|');
+  let hash = 5381;
+
+  for (let i = 0; i < input.length; i += 1) {
+    hash = ((hash << 5) + hash) + input.charCodeAt(i);
+    hash &= 0xffffffff;
+  }
+
+  return (hash >>> 0).toString(16);
+}
+
+// Installation: pre-cache all app shell files
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(CACHE_FILES);
-    }).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(CACHE_FILES))
+      .then(() => self.skipWaiting())
   );
 });
 
-// Aktivierung: alten Cache löschen
+// Activation: delete old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
-      );
-    }).then(() => self.clients.claim())
+    caches.keys().then((keys) => Promise.all(
+      keys
+        .filter((key) => key !== CACHE_NAME)
+        .map((key) => caches.delete(key))
+    )).then(() => self.clients.claim())
   );
 });
 
@@ -108,7 +139,7 @@ async function imageCacheFirst(request, event) {
   if (cached) {
     event.waitUntil(
       fetch(request)
-        .then(response => putInCache(request, response))
+        .then((response) => putInCache(request, response))
         .catch(() => null)
     );
     return cached;
@@ -125,7 +156,7 @@ async function imageCacheFirst(request, event) {
   }
 }
 
-// Fetch: Online-first, Fallback zu Cache
+// Fetch: online-first for most content, cache-first for images
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
