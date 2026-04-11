@@ -3,7 +3,7 @@
 // Offline-Fähigkeit für PWA
 // ═══════════════════════════════════════════════════════
 
-const CACHE_NAME = 'reborn-v5.7';
+const CACHE_NAME = 'reborn-v5.8';
 const OFFLINE_FALLBACK_URL = './index.html';
 
 const CACHE_FILES = [
@@ -25,6 +25,8 @@ const CACHE_FILES = [
   './public/images/cosmic-entity-digital-upheaval.png',
   './public/images/kaito-coding-darkness.png',
   './public/images/kaito-birth-family.png',
+  './public/images/kaito-first-word-kitchen.png',
+  './public/images/kaito-first-code-read.png',
   './public/images/kaito-family-scan.png',
   './public/images/mira-birth-intro.png',
   './public/images/mira-scan-field.png',
