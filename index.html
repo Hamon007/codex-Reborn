@@ -292,13 +292,25 @@
     .scene-bg-image-layer {
       position: fixed; inset: 0; z-index: 0;
       pointer-events: none;
-      background-position: center;
+      --scene-image: none;
+      background-image: var(--scene-image);
+      background-position: center center;
       background-size: cover;
       background-repeat: no-repeat;
       opacity: 0;
-      transform: scale(1.03);
-      filter: brightness(0.82) saturate(1.02) contrast(1.02);
+      transform: scale(1.015);
       transition: opacity 0.55s ease, transform 0.9s ease;
+    }
+    .scene-bg-image-layer::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: var(--scene-image);
+      background-position: center center;
+      background-size: contain;
+      background-repeat: no-repeat;
+      opacity: 0.96;
+      filter: saturate(1.03) contrast(1.03);
     }
     .scene-bg-image-layer.glitch.show { animation: none; }
     .scene-bg-image-layer.show {
@@ -309,10 +321,10 @@
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.24) 45%, rgba(0,0,0,0.58) 100%);
+      background: linear-gradient(to bottom, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.2) 48%, rgba(0,0,0,0.5) 100%);
     }
     .scene-bg-image-layer.glitch::after {
-      background: linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.24) 45%, rgba(0,0,0,0.58) 100%);
+      background: linear-gradient(to bottom, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.2) 48%, rgba(0,0,0,0.5) 100%);
     }
     .scene-void-fragments {
       position: fixed;
@@ -973,6 +985,12 @@
         border-radius: 7px;
       }
     }
+    @media (max-aspect-ratio: 10/16) {
+      .scene-bg-image-layer::before {
+        background-size: 100% auto;
+        opacity: 0.98;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1218,12 +1236,12 @@ const SCENE_BACKGROUND_IMAGES = {
 const SCENE_NODE_IMAGES = {
   // Fruehe Geburt / Familienmomente
   a1_geburt: './public/images/kaito-birth-family.png',
-  a1_erste_nacht: './public/images/family-first-night-watch.png',
+  a1_erste_nacht: './public/images/family-first-night-watch-v2.png',
   a1_schlaflied: './public/images/elena-lullaby-night.png',
   a2_familie_montage: './public/images/family-daily-montage.png',
   a1_erstes_wort: './public/images/kaito-first-word-kitchen.png',
   a3_code_read: './public/images/kaito-first-code-read.png',
-  a3_familie_scan: './public/images/kaito-family-scan.png',
+  a3_familie_scan: './public/images/kaito-family-scan-v2.png',
   a4_mira_geburt: './public/images/mira-birth-intro.png',
   a4_mira_scan: './public/images/mira-scan-field.png',
 
@@ -1695,7 +1713,7 @@ function renderSceneBackgroundImage(nodeId, bgKey) {
   layer.classList.toggle('glitch', hasGlitch);
   if (!src) {
     layer.classList.remove('show');
-    layer.style.backgroundImage = 'none';
+    layer.style.setProperty('--scene-image', 'none');
     layer.dataset.src = '';
     setVoidFragmentsVisible(false);
     return;
@@ -1709,7 +1727,7 @@ function renderSceneBackgroundImage(nodeId, bgKey) {
   preloadSceneImage(src).then(() => {
     if (token !== sceneBackgroundSwapToken) return;
     layer.classList.remove('show');
-    layer.style.backgroundImage = `url("${src}")`;
+    layer.style.setProperty('--scene-image', `url("${src}")`);
     layer.dataset.src = src;
     setVoidFragmentsVisible(hasGlitch);
     requestAnimationFrame(() => {
